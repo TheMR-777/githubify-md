@@ -30,7 +30,7 @@ var outputOption = new Option<FileInfo?>(
 };
 
 var yesOption = new Option<bool>( // For non-interactive mode / scripting
-	name: "--yes",
+	aliases: ["--yes", "-y"],
 	description: "Skip interactive prompts and use defaults or provided options.",
 	getDefaultValue: () => false);
 
@@ -57,8 +57,10 @@ rootCommand.SetHandler(async context =>
 	var configFilePath = "config.json";
 	var useConfigFile = false;
 
+	if (!skipPrompts)
+		AnsiConsole.Clear();
+
 	// --- Configuration Loading / Interactive Setup ---
-	AnsiConsole.Clear();
 	AnsiConsole.WriteLine('\n');
 	AnsiConsole.Write(new FigletText("MD >> HTML").Centered().Color(Color.Cyan1));
 	AnsiConsole.WriteLine();
@@ -241,8 +243,9 @@ rootCommand.SetHandler(async context =>
 
 		AnsiConsole.MarkupLine($"[bold green]Success![/] HTML file generated at: [underline cyan]{config.ResolvedOutputFile}[/]");
 		AnsiConsole.WriteLine();
+		if (!skipPrompts)
+			AnsiConsole.Console.Input.ReadKey(false);
 
-		AnsiConsole.Console.Input.ReadKey(false);
 		context.ExitCode = 0;
 	}
 	catch (FileNotFoundException ex)
