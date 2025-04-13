@@ -13,7 +13,6 @@ var inputOption = new Option<FileInfo?>(
 	IsRequired = false // Not strictly required if config file or prompt is used
 };
 
-
 var themeOption = new Option<Theme?>( // Nullable for explicit detection
 	name: "--theme",
 	description: "Specify the color theme (Light/Dark).");
@@ -218,7 +217,6 @@ rootCommand.SetHandler(async context =>
 				// 1. Read Markdown File
 				ctx.Status($"Reading [blue]{Path.GetFileName(config.ResolvedInputFile)}[/]...");
 				var markdownContent = await File.ReadAllTextAsync(config.ResolvedInputFile);
-				await Task.Delay(150); // Simulate work
 
 				// 2. Get CSS if Embed mode
 				if (config.CssMode == CssMode.Embed)
