@@ -109,12 +109,10 @@ internal static class UserInterface
 
     private static ConfigurationAction PromptForConfigurationAction()
     {
-        // ✨ Artpiece: Windows Terminal friendly symbols
-        AnsiConsole.MarkupLine("[yellow]>> Choose an action:[/]");
-        AnsiConsole.MarkupLine("[dim]   Press [cyan]1-4[/] to change settings[/]");
-        AnsiConsole.MarkupLine("[dim]   Press [cyan]Enter[/] to proceed with conversion[/]");
-        AnsiConsole.MarkupLine("[dim]   Press [cyan]Esc[/] to cancel[/]");
-        AnsiConsole.WriteLine();
+        // ✨ Artpiece: Store cursor position to enable clean section replacement
+        var actionPromptStartLine = AnsiConsole.Console.Profile.Height - AnsiConsole.Console.Profile.Height + Console.CursorTop;
+        
+        ShowActionPrompt();
 
         while (true)
         {
@@ -134,11 +132,37 @@ internal static class UserInterface
             };
 
             if (action.HasValue)
+            {
+                // ✨ Artpiece: Clear the action prompt section for clean UI
+                ClearActionPromptSection();
                 return action.Value;
+            }
             
             // Invalid key - show error and continue
             AnsiConsole.MarkupLine("[red]>> Invalid key! Please use 1-4, Enter, or Esc[/]");
         }
+    }
+
+    private static void ShowActionPrompt()
+    {
+        // ✨ Artpiece: Clean action prompt display
+        AnsiConsole.MarkupLine("[yellow]>> Choose an action:[/]");
+        AnsiConsole.MarkupLine("[dim]   Press [cyan]1-4[/] to change settings[/]");
+        AnsiConsole.MarkupLine("[dim]   Press [cyan]Enter[/] to proceed with conversion[/]");
+        AnsiConsole.MarkupLine("[dim]   Press [cyan]Esc[/] to cancel[/]");
+        AnsiConsole.WriteLine();
+    }
+
+    private static void ClearActionPromptSection()
+    {
+        // ✨ Artpiece: Clear the action prompt section (5 lines) for clean replacement
+        Console.SetCursorPosition(0, Console.CursorTop - 5);
+        for (int i = 0; i < 5; i++)
+        {
+            Console.Write(new string(' ', Console.WindowWidth - 1));
+            Console.WriteLine();
+        }
+        Console.SetCursorPosition(0, Console.CursorTop - 5);
     }
 
     private static void ShowActionFeedback(ConfigurationAction action)
@@ -177,38 +201,21 @@ internal static class UserInterface
         AnsiConsole.WriteLine();
     }
 
-    public static PostConversionAction ShowPostConversionOptions()
-    {
-        AnsiConsole.WriteLine();
-        
-        // ✨ Artpiece: Windows Terminal friendly success display
-        var panel = new Panel(
-            new Markup("[green]SUCCESS! Conversion completed successfully![/]\n\n" +
-                      "[dim]What would you like to do next?[/]"))
-            .Header("[bold cyan]All Done![/]")
-            .BorderColor(Color.Green)
-            .RoundedBorder();
-        
-        AnsiConsole.Write(panel);
-        AnsiConsole.WriteLine();
-
-        var choice = AnsiConsole.Prompt(
+    public static PostConversionAction ShowPostConversionOptions() =>
+        AnsiConsole.Prompt(
             new SelectionPrompt<PostConversionAction>()
                 .Title("[yellow]>> Choose your next action:[/]")
                 .AddChoices(
+                    PostConversionAction.Exit,
                     PostConversionAction.ConvertAnother,
-                    PostConversionAction.OpenOutput,
-                    PostConversionAction.Exit)
+                    PostConversionAction.OpenOutput)
                 .UseConverter(action => action switch
                 {
-                    PostConversionAction.ConvertAnother => ">> Convert another file",
-                    PostConversionAction.OpenOutput => ">> Open output file",
-                    PostConversionAction.Exit => ">> Exit application",
+                    PostConversionAction.ConvertAnother => "Convert another file",
+                    PostConversionAction.OpenOutput => "Open output file",
+                    PostConversionAction.Exit => "Exit application",
                     _ => action.ToString()
                 }));
-
-        return choice;
-    }
 
     public enum PostConversionAction
     {
