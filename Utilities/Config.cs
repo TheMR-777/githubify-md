@@ -38,15 +38,14 @@ public class Config
 
 	public void ResolvePaths(string? cliInputFile = null)
 	{
-		// Prioritize CLI argument, then config file, then throw
-		ResolvedInputFile = cliInputFile ?? InputFile ?? throw new ArgumentNullException(nameof(InputFile), "Input file path must be provided either via CLI argument or config file.");
+		// ✨ Artpiece: Null-coalescing with meaningful exception
+		ResolvedInputFile = cliInputFile ?? InputFile ?? 
+			throw new ArgumentNullException(nameof(InputFile), "Input file path must be provided either via CLI argument or config file.");
 
 		if (!File.Exists(ResolvedInputFile))
-		{
 			throw new FileNotFoundException($"Input Markdown file not found: {ResolvedInputFile}");
-		}
 
-		// Derive output path if not specified
+		// ✨ Artpiece: Proper path manipulation
 		ResolvedOutputFile = OutputFile ?? Path.ChangeExtension(ResolvedInputFile, ".html");
 	}
 }
